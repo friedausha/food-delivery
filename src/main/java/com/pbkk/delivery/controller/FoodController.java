@@ -24,9 +24,12 @@ public class FoodController {
         return foodRepository.findAll();
     }
 
-    @PutMapping("/edit")
-    public @ResponseBody String editFood(@Valid @RequestBody Food food, Integer id){
-        User user = userRepository.getOne(id);
+    @GetMapping("/{id}")
+    public @ResponseBody Food findById(@PathVariable Integer id) { return foodRepository.getOne(id); }
+
+    @PutMapping("/edit}")
+    public @ResponseBody String editFood(@Valid @RequestBody Food food, @RequestParam Integer userId){
+        User user = userRepository.getOne(userId);
         if(user.getRole() == 2){
             foodRepository.save(food);
             return "Update Success";
@@ -36,8 +39,8 @@ public class FoodController {
         }
     }
 
-    @PostMapping("/new/{userId}")
-    public @ResponseBody String addFood(@Valid @RequestBody Food food, @PathVariable Integer userId){
+    @PostMapping("/new}")
+    public @ResponseBody String addFood(@Valid @RequestBody Food food, @RequestParam Integer userId){
         User user = userRepository.getOne(userId);
         if(user.getRole() == 2){
             foodRepository.save(food);
@@ -48,8 +51,8 @@ public class FoodController {
         }
     }
     
-    @DeleteMapping("/{id}/{userId}")
-    public @ResponseBody String deleteFood(@Valid @RequestBody @PathVariable Integer id, @PathVariable Integer userId){
+    @DeleteMapping("/{id}")
+    public @ResponseBody String deleteFood(@Valid @PathVariable Integer id, @RequestParam Integer userId){
         User user = userRepository.getOne(userId);
         if(user.getRole() == 2){
             foodRepository.deleteById(id);

@@ -25,12 +25,12 @@ public class UserController {
     }
 
     @PostMapping("/new")
-    public @ResponseBody User registerUser(@Valid @RequestBody User user){
+    public @ResponseBody User registerUser(@RequestBody User user){
         return userRepository.save(user);
     }
 
     @PutMapping("/edit")
-    public @ResponseBody User editUser(@Valid @RequestBody User user){
+    public @ResponseBody User editUser(@RequestBody User user){
          return userRepository.save(user);
     }
 
