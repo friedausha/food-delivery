@@ -5,24 +5,32 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name="transaction_detail")
-@Getter @Setter
+@Table(name = "transaction_detail")
+@Getter
+@Setter
 public class TransactionDetail implements Serializable {
-
-    private @Id @GeneratedValue int id;
-
+    @Id
+    @GeneratedValue
+    private Integer id;
     private Food food_item;
-
-    private int amount;
-
-    private Long total;
-
+    private Integer amount;
+    private Integer total;
     private String status;
-
-    @JoinColumn(name="transaction_id")
+    @ManyToOne
     private Transaction transaction;
+
+    public TransactionDetail(){}
+    public TransactionDetail(Transaction transaction,
+                             Food food,
+                             Integer amount,
+                             Integer total,
+                             String status){
+        this.transaction = transaction;
+        this.food_item = food;
+        this.amount = amount;
+        this.total = total;
+        this.status = status;
+    }
 }

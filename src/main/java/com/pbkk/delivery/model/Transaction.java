@@ -7,17 +7,21 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name="transaction")
-@Getter @Setter
+@Table(name = "transaction")
+@Getter
+@Setter
 public class Transaction implements Serializable {
-
-    private @Id @GeneratedValue int id;
-
-    @JoinColumn(name="customer_id")
+    @Id
+    @GeneratedValue
+    private Integer id;
+    @ManyToOne
     private User customer;
-
-    @JoinColumn(name="driver_id")
+    @ManyToOne
     private User driver;
 
+    public Transaction(User customer, User driver) {
+        this.customer = customer;
+        this.driver = driver;
+    }
     public Transaction(){}
 }

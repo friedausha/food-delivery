@@ -8,27 +8,26 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name="user")
-@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
-@Getter @Setter
+@Table(name = "user")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Getter
+@Setter
 public class User implements Serializable {
-
-    private @Id @GeneratedValue(strategy=GenerationType.AUTO) int id;
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
     private String username;
-
     private String phone_number;
-
     private String password;
+    private Integer role;
 
-    private int role;
-
-    public User(String username, String phone_number, String password, int role){
+    public User(String username, String phone_number, String password, int role) {
         this.username = username;
         this.phone_number = phone_number;
         this.password = password;
         this.role = role;
     }
 
-    public User(){}
+    public User() {
+    }
 }

@@ -8,16 +8,18 @@ import java.io.Serializable;
 
 
 @Entity
-@Table(name="food")
-@Getter @Setter
+@Table(name = "food")
+@Getter
+@Setter
 public class Food implements Serializable {
-
-    private @Id @GeneratedValue int id;
-
+    @Id
+    @GeneratedValue
+    private Integer id;
     private String name;
-
     private Long price;
 
     @Lob
     private byte[] picture;
+
+    public Food(){}
 }
