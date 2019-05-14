@@ -1,6 +1,5 @@
 package com.pbkk.delivery.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.pbkk.delivery.HibernateProxyTypeAdapter;
@@ -34,7 +33,7 @@ public class DeliveryController {
     }
 
     @GetMapping("/status/{id}")
-    public ResponseEntity<String> show(@PathVariable Integer id) throws JsonProcessingException {
+    public ResponseEntity<String> show(@PathVariable Integer id) {
         Delivery delivery = deliveryRepository.getOne(id);
 
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -47,10 +46,10 @@ public class DeliveryController {
     }
 
     @PostMapping("/request")
-    public @ResponseBody
-    String create(@RequestParam Integer order_id,
-                  @RequestParam Integer restaurant_id,
-                  @RequestParam String delivery_address) {
+    @ResponseBody
+    public String create(@RequestParam Integer order_id,
+                         @RequestParam Integer restaurant_id,
+                         @RequestParam String delivery_address) {
         Delivery delivery = new Delivery();
         Restaurant restaurant = restaurantRepository.getOne(restaurant_id);
         Order order = orderRepository.getOne(order_id);
@@ -89,7 +88,7 @@ public class DeliveryController {
                                          @RequestParam Integer driver_id,
                                          @PathVariable Integer order_id) {
         Delivery order = deliveryRepository.getOne(order_id);
-        if (order.getDriver().getId() != driver_id) {
+        if (!order.getDriver().getId().equals(driver_id)) {
             return ResponseEntity.status(404).body("You are not authorized to update the order status");
         } else {
             order.setStatus(status);
