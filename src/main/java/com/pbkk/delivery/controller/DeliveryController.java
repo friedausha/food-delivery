@@ -12,10 +12,15 @@ import com.pbkk.delivery.repository.DriverRepository;
 import com.pbkk.delivery.repository.OrderRepository;
 import com.pbkk.delivery.repository.RestaurantRepository;
 import com.pbkk.delivery.service.SecurityServiceImpl;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -51,24 +56,40 @@ public class DeliveryController {
 
     @PostMapping("/request")
     @ResponseBody
-    public String create(@RequestParam Integer order_id,
-//                         @RequestHeader String token,
+    public String create(@RequestHeader String token,
+                         @RequestParam Integer order_id,
                          @RequestParam String delivery_address) throws IOException {
         Delivery delivery = new Delivery();
         String username = securityService.getRequestUsername();
-        Restaurant restaurant = restaurantRepository.findRestaurantByUsername(username);
+//        Restaurant restaurant = restaurantRepository.findRestaurantByUsername(username);
+        final String uri = "http://128.199.210.218:7001/restaurant/";
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("token", token);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
+        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, entity, String.class);
+        String result = response.getBody();
+//        RestTemplate restTemplate = new RestTemplate();
+//        String result = restTemplate.getForObject(uri, String.class);
+        assert result != null;
+        boolean isFound = result.contains(username);
+        if (!isFound) {
+            return "Not authorized";
+        } else {
+            System.out.println(result);
+            Order order = orderRepository.getOne(order_id);
+            Restaurant restaurant = new Restaurant();
+            restaurant.setUsername(username);
+            restaurantRepository.save(restaurant);
+            delivery.setStatus(1);
 
-        
+            delivery.setRestaurant(restaurant);
+            delivery.setOrder(order);
+            delivery.setDelivery_address(delivery_address);
+            deliveryRepository.save(delivery);
 
-        Order order = orderRepository.getOne(order_id);
-
-        delivery.setStatus(1);
-        delivery.setRestaurant(restaurant);
-        delivery.setOrder(order);
-        delivery.setDelivery_address(delivery_address);
-        deliveryRepository.save(delivery);
-
-        return "Delivery requested";
+            return "Delivery requested";
+        }
     }
 
     @PutMapping("/accept/{id}")
@@ -103,5 +124,6 @@ public class DeliveryController {
             return ResponseEntity.ok("Status updated");
         }
     }
+
 }
 
