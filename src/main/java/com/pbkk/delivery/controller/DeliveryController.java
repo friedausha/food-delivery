@@ -11,8 +11,11 @@ import com.pbkk.delivery.repository.DeliveryRepository;
 import com.pbkk.delivery.repository.DriverRepository;
 import com.pbkk.delivery.repository.OrderRepository;
 import com.pbkk.delivery.repository.RestaurantRepository;
+import com.pbkk.delivery.service.SecurityServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 
 @RestController
@@ -23,13 +26,14 @@ public class DeliveryController {
     private final DriverRepository driverRepository;
     private final RestaurantRepository restaurantRepository;
     private final OrderRepository orderRepository;
+    private final SecurityServiceImpl securityService;
 
-
-    public DeliveryController(DeliveryRepository deliveryRepository, DriverRepository driverRepository, RestaurantRepository restaurantRepository, OrderRepository orderRepository) {
+    public DeliveryController(DeliveryRepository deliveryRepository, DriverRepository driverRepository, RestaurantRepository restaurantRepository, OrderRepository orderRepository, SecurityServiceImpl securityService) {
         this.deliveryRepository = deliveryRepository;
         this.driverRepository = driverRepository;
         this.restaurantRepository = restaurantRepository;
         this.orderRepository = orderRepository;
+        this.securityService = securityService;
     }
 
     @GetMapping("/status/{id}")
@@ -48,12 +52,15 @@ public class DeliveryController {
     @PostMapping("/request")
     @ResponseBody
     public String create(@RequestParam Integer order_id,
-                         @RequestParam Integer restaurant_id,
-                         @RequestParam String delivery_address) {
+//                         @RequestHeader String token,
+                         @RequestParam String delivery_address) throws IOException {
         Delivery delivery = new Delivery();
-        Restaurant restaurant = restaurantRepository.getOne(restaurant_id);
-        Order order = orderRepository.getOne(order_id);
+        String username = securityService.getRequestUsername();
+        Restaurant restaurant = restaurantRepository.findRestaurantByUsername(username);
 
+        
+
+        Order order = orderRepository.getOne(order_id);
 
         delivery.setStatus(1);
         delivery.setRestaurant(restaurant);

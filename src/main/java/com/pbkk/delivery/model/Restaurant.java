@@ -14,4 +14,6 @@ public class Restaurant {
     @Id
     @GeneratedValue
     private Integer id;
+
+    private String username;
 }
