@@ -61,7 +61,7 @@ public class DeliveryController {
                          @RequestParam String delivery_address) throws IOException {
         Delivery delivery = new Delivery();
         String username = securityService.getRequestUsername();
-//        Restaurant restaurant = restaurantRepository.findRestaurantByUsername(username);
+
         final String uri = "http://128.199.210.218:7001/restaurant/";
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -69,8 +69,7 @@ public class DeliveryController {
         HttpEntity<String> entity = new HttpEntity<>("", headers);
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, entity, String.class);
         String result = response.getBody();
-//        RestTemplate restTemplate = new RestTemplate();
-//        String result = restTemplate.getForObject(uri, String.class);
+
         assert result != null;
         boolean isFound = result.contains(username);
         if (!isFound) {
@@ -93,14 +92,31 @@ public class DeliveryController {
     }
 
     @PutMapping("/accept/{id}")
-    public ResponseEntity<String> accept(@PathVariable Integer id, @RequestParam Integer driver_id) {
+    public ResponseEntity<String> accept(@PathVariable Integer id,
+//                                         @RequestParam Integer driver_id,
+                                         @RequestHeader String token) throws IOException {
         Delivery orderRealTime = deliveryRepository.getOne(id);
         if (orderRealTime.getStatus() != 1) {
             return ResponseEntity.ok("The order has already been picked up by other driver");
         } else {
-            Driver driver = driverRepository.getOne(driver_id);
+//            Driver driver = driverRepository.getOne(driver_id);
+            String username = securityService.getRequestUsername();
+            final String uri = "http://128.199.210.218:7001/driver/";
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("token", token);
+            HttpEntity<String> entity = new HttpEntity<>("", headers);
 
-            if (driver != null) {
+            ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, entity, String.class);
+            String result = response.getBody();
+            assert result != null;
+            boolean isFound = result.contains(username);
+
+            if (isFound ) {
+                Driver driver = new Driver();
+                driver.setName(username);
+                driverRepository.save(driver);
+
                 orderRealTime.setDriver(driver);
                 orderRealTime.setStatus(2);
                 deliveryRepository.save(orderRealTime);
@@ -113,10 +129,12 @@ public class DeliveryController {
 
     @PutMapping("/update/{order_id}")
     public ResponseEntity<String> update(@RequestParam Integer status,
-                                         @RequestParam Integer driver_id,
-                                         @PathVariable Integer order_id) {
+                                         @PathVariable Integer order_id) throws IOException {
         Delivery order = deliveryRepository.getOne(order_id);
-        if (!order.getDriver().getId().equals(driver_id)) {
+
+        String username = securityService.getRequestUsername();
+
+        if (!order.getDriver().getName().equals(username)) {
             return ResponseEntity.status(404).body("You are not authorized to update the order status");
         } else {
             order.setStatus(status);
